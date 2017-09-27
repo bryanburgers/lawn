@@ -98,7 +98,7 @@ const Lawn = {
       const originalVal = properties[key]
 
       let val
-      if (!originalVal) {
+      if (originalVal === undefined) {
         if (cfg.optional === true) {
           continue
         }

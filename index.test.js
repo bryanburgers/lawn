@@ -8,8 +8,51 @@ const stripIndent = require('strip-indent')
 const lawn = require('.')
 
 describe('lawn', function () {
-  describe('validate', function () {
-    it('converters a number', function () {
+  describe('.validate(spec)', function () {
+    it('throws on missing key', function () {
+      const spec = {
+        PORT: lawn.number
+      }
+
+      assert.throws(() => lawn.validate(spec, {
+        SECRET: 'WHAT'
+      }), /PORT is missing/)
+    })
+
+    it('uses defaults when missing', function () {
+      const spec = {
+        PORT: lawn.number.default(8000)
+      }
+
+      const result = lawn.validate(spec, {
+        SECRET: 'WHAT'
+      })
+
+      assert.propertyVal(result, 'PORT', 8000)
+    })
+
+    it('validates process.env if no properties are given', function () {
+      process.env = {
+        SECRET: 's3cr3t',
+        PORT: '8000'
+      }
+
+      const spec = {
+        SECRET: lawn.string,
+        PORT: lawn.number
+      }
+
+      const result = lawn.validate(spec)
+
+      assert.deepEqual(result, {
+        SECRET: 's3cr3t',
+        PORT: 8000
+      })
+    })
+  })
+
+  describe('.number', function () {
+    it('converts a number', function () {
       const spec = {
         SECRET: lawn.string,
         PORT: lawn.number
@@ -35,29 +78,9 @@ describe('lawn', function () {
         PORT: 'WHAT'
       }), /PORT is invalid: 'WHAT' is not a number/)
     })
+  })
 
-    it('throws on missing key', function () {
-      const spec = {
-        PORT: lawn.number
-      }
-
-      assert.throws(() => lawn.validate(spec, {
-        SECRET: 'WHAT'
-      }), /PORT is missing/)
-    })
-
-    it('uses defaults when missing', function () {
-      const spec = {
-        PORT: lawn.number.default(8000)
-      }
-
-      const result = lawn.validate(spec, {
-        SECRET: 'WHAT'
-      })
-
-      assert.propertyVal(result, 'PORT', 8000)
-    })
-
+  describe('.bool', function () {
     it('converts a boolean', function () {
       const spec = {
         BOOL0: lawn.bool,
@@ -92,24 +115,17 @@ describe('lawn', function () {
         BOOL7: false
       })
     })
+  })
 
-    it('validates process.env if no properties are given', function () {
-      process.env = {
-        SECRET: 's3cr3t',
-        PORT: '8000'
-      }
-
+  describe('.string', function () {
+    it('accepts the empty string as valid', function () {
       const spec = {
-        SECRET: lawn.string,
-        PORT: lawn.number
+        PASSWORD: lawn.string
       }
 
-      const result = lawn.validate(spec)
-
-      assert.deepEqual(result, {
-        SECRET: 's3cr3t',
-        PORT: 8000
-      })
+      assert.doesNotThrow(() => lawn.validate(spec, {
+        PASSWORD: ''
+      }))
     })
   })
 
@@ -177,7 +193,7 @@ describe('lawn', function () {
     })
   })
 
-  describe('output', function () {
+  describe('.output(spec)', function () {
     it('outputs some simple stuff', function () {
       const spec = {
         MYSQL_HOST: lawn.string,
