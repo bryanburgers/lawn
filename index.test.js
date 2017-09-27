@@ -10,12 +10,12 @@ const lawn = require('.')
 describe('lawn', function () {
   describe('validate', function () {
     it('converters a number', function () {
-      const config = {
+      const spec = {
         SECRET: lawn.string,
         PORT: lawn.number
       }
 
-      const result = lawn.validate(config, {
+      const result = lawn.validate(spec, {
         SECRET: 's3cr3t',
         PORT: '8000'
       })
@@ -27,31 +27,31 @@ describe('lawn', function () {
     })
 
     it('throws on NaN', function () {
-      const config = {
+      const spec = {
         PORT: lawn.number
       }
 
-      assert.throws(() => lawn.validate(config, {
+      assert.throws(() => lawn.validate(spec, {
         PORT: 'WHAT'
       }), /PORT is invalid: 'WHAT' is not a number/)
     })
 
     it('throws on missing key', function () {
-      const config = {
+      const spec = {
         PORT: lawn.number
       }
 
-      assert.throws(() => lawn.validate(config, {
+      assert.throws(() => lawn.validate(spec, {
         SECRET: 'WHAT'
       }), /PORT is missing/)
     })
 
     it('uses defaults when missing', function () {
-      const config = {
+      const spec = {
         PORT: lawn.number.default(8000)
       }
 
-      const result = lawn.validate(config, {
+      const result = lawn.validate(spec, {
         SECRET: 'WHAT'
       })
 
@@ -59,7 +59,7 @@ describe('lawn', function () {
     })
 
     it('converts a boolean', function () {
-      const config = {
+      const spec = {
         BOOL0: lawn.bool,
         BOOL1: lawn.bool,
         BOOL2: lawn.bool,
@@ -70,7 +70,7 @@ describe('lawn', function () {
         BOOL7: lawn.bool
       }
 
-      const result = lawn.validate(config, {
+      const result = lawn.validate(spec, {
         BOOL0: 'yes',
         BOOL1: 'YES',
         BOOL2: 'y',
@@ -99,28 +99,37 @@ describe('lawn', function () {
         PORT: '8000'
       }
 
-      const config = {
+      const spec = {
         SECRET: lawn.string,
         PORT: lawn.number
       }
 
-      const result = lawn.validate(config)
+      const result = lawn.validate(spec)
 
       assert.deepEqual(result, {
         SECRET: 's3cr3t',
         PORT: 8000
       })
     })
+
+    it('allows optional values', function () {
+      const spec = {
+        OPTIONAL: lawn.string.optional
+      }
+
+      const result = lawn.validate(spec, {})
+      assert.notProperty(result, 'OPTIONAL')
+    })
   })
 
   describe('output', function () {
     it('outputs some simple stuff', function () {
-      const config = {
+      const spec = {
         MYSQL_HOST: lawn.string,
         MYSQL_PORT: lawn.number
       }
 
-      const result = lawn.output(config)
+      const result = lawn.output(spec)
 
       assert.equal(result, stripIndent(`
                 MYSQL_HOST=
@@ -129,12 +138,12 @@ describe('lawn', function () {
     })
 
     it('includes descriptions, if available', function () {
-      const config = {
+      const spec = {
         MYSQL_HOST: lawn.string.desc('The MySQL host'),
         MYSQL_PORT: lawn.number.desc('The port to run MySQL on')
       }
 
-      const result = lawn.output(config)
+      const result = lawn.output(spec)
 
       assert.equal(result, stripIndent(`
                 # The MySQL host
@@ -145,11 +154,11 @@ describe('lawn', function () {
     })
 
     it('includes examples', function () {
-      const config = {
+      const spec = {
         MYSQL_HOST: lawn.string.example('127.0.0.1')
       }
 
-      const result = lawn.output(config)
+      const result = lawn.output(spec)
 
       assert.equal(result, stripIndent(`
                 MYSQL_HOST=127.0.0.1
@@ -157,11 +166,23 @@ describe('lawn', function () {
     })
 
     it('includes commented out defaults', function () {
-      const config = {
+      const spec = {
         MYSQL_PORT: lawn.number.default(3306)
       }
 
-      const result = lawn.output(config)
+      const result = lawn.output(spec)
+
+      assert.equal(result, stripIndent(`
+                # MYSQL_PORT=3306
+            `).trim())
+    })
+
+    it('includes commented out optionals', function () {
+      const spec = {
+        MYSQL_PORT: lawn.number.optional.example(3306)
+      }
+
+      const result = lawn.output(spec)
 
       assert.equal(result, stripIndent(`
                 # MYSQL_PORT=3306

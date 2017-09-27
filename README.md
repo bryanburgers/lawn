@@ -173,3 +173,9 @@ environment string.
 
 An example value of the property. This is used when generating an example
 environment string.
+
+### .optional
+
+Mark the property as optional. If marked as optional and the property does not
+exist, `lawn.validate` will not throw an error, and instead will not include
+the property in its return value.

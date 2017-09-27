@@ -73,6 +73,10 @@ const Lawn = {
     return this.props({ default: def })
   },
 
+  get optional () {
+    return this.props({ optional: true })
+  },
+
   validate (config, properties) {
     if (!properties) {
       properties = process.env
@@ -88,6 +92,9 @@ const Lawn = {
 
       let val
       if (!originalVal) {
+        if (cfg.optional === true) {
+          continue
+        }
         if (cfg.default === undefined) {
           throw new Error(`${key} is missing`)
         }
@@ -118,7 +125,10 @@ const Lawn = {
         strs.push(`# ${cfg.description}`)
       }
 
-      if (cfg.default !== undefined) {
+      if (cfg.optional === true) {
+        const example = cfg.example || ''
+        strs.push(`# ${key}=${example}`)
+      } else if (cfg.default !== undefined) {
         strs.push(`# ${key}=${cfg.default}`)
       } else {
         const example = cfg.example || ''
