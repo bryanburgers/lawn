@@ -6,7 +6,7 @@ Lawn is a library for validating that your environment variables are what you
 expect, and generating .env files.
 
 ```js
-require('lawn')
+const lawn = require('lawn')
 ```
 
 
@@ -30,12 +30,16 @@ Enter, `lawn`. Lawn lets you declaratively express all of your configuration
 up-front.
 
 ```js
-const lawnConfig = {
+// lawn-spec.js
+module.exports = {
     PORT: lawn.number.desc('The port that the server will listen on').default(8000),
     SECRET: lawn.string.desc('The encryption key. Set it very secretly').example('S3CR3T'),
 }
 
-const config = lawn.validate(lawnConfig, process.env)
+// index.js
+const lawn = require('lawn')
+const lawnSpec = require('./lawn-spec')
+const config = lawn.validate(lawnSpec, process.env)
 ```
 
 Lawn transforms and validates your properties.
@@ -53,7 +57,7 @@ out-of-date. Instead of maintaining an .env.sample when changing an environment
 variable, generate it from the config instead.
 
 ```js
-console.log(lawn.output(lawnConfig))
+console.log(lawn.output(lawnSpec))
 ```
 
 This outputs
@@ -64,3 +68,108 @@ This outputs
 # The encryption key. Set it very secretly
 SECRET=S3CR3T
 ```
+
+
+## Spec API
+
+### lawn
+
+The root spec object.
+
+### lawn.validate(spec, [props])
+
+Validate the given spec against the properties given. If no properties are
+given, `process.env` is used.
+
+If the validation succeeds, the transformed configuration will be returned.
+
+If the validation fails, an error will be thrown with a reasonable error message.
+
+```js
+const lawnSpec = {
+  PORT: lawn.number.description('The port to listen on').default(8000),
+  DEBUG: lawn.bool.description('Whether to start in debug mode').default(true),
+}
+
+lawn.validate(lawnSpec, {})
+//=> { PORT: 8000, DEBUG: true }
+
+lawn.validate(lawnSpec, { PORT: "3500", DEBUG: "0" }
+//=> { PORT: 3500, DEBUG: false }
+
+lawn.validate(lawnSpec, { PORT: "Yes, please" }
+//=> throws "PORT is invalid: 'Yes, please' is not a number"
+```
+
+### lawn.output(spec)
+
+Returns a string in [dotenv format][dotenv] format, including descriptions (if
+set) and example values.
+
+```js
+const lawnSpec = {
+  PORT: lawn.number
+    .description('The port to listen on')
+    .default(8000),
+
+  AWS_ACCESS_KEY_ID: lawn.string
+    .description('The AWS access key for the S3 bucket')
+    .example('AKIAIOSFODNN7EXAMPLE'),
+
+  AWS_SECRET_ACCESS_KEY: lawn.string
+    .description('The AWS secret key for the S3 bucket')
+    .example('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'),
+
+  AWS_REGION: lawn.string
+    .description('The AWS region where the S3 bucket resides')
+    .default('us-east-1'),
+}
+
+lawn.output(lawnSpec)
+=> `# The port to listen on
+# PORT=8000
+# The AWS access key for the S3 bucket
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+# The AWS secret key for the S3 bucket
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# The AWS region where the S3 bucket resides
+# AWS_REGION=us-east-1`
+```
+
+[dotenv]: https://www.npmjs.com/package/dotenv
+
+### .string
+
+Declares that this property is a string.
+
+### .number
+
+Declares this this property is an integer.
+
+### .bool
+
+Declare that this property is a boolean.
+
+Values that resolve to `true` are:
+
+- `"true"` (case-insensitive)
+- `"yes"` (case-insensitive)
+- `"t"` (case-insensitive)
+- `"1"`
+
+All other values resolve to `false`.
+
+### .default(v)
+
+The default value of the property. If no environment variable is set for this
+property, then use the default.
+
+### .description(d)
+
+A description of the property. This is used when generating an example
+environment string.
+
+### .example(v)
+
+An example value of the property. This is used when generating an example
+environment string.
