@@ -7,6 +7,7 @@
   "author": "Bryan Burgers <bryan@burgers.io>",
   "license": "MIT",
   "scripts": {
+    "commit": "git-cz",
     "test": "mocha './{,!(node_modules)/**/}*.test.js'",
     "posttest": "standard",
     "lint": "eslint '**/*.js'",
@@ -14,9 +15,15 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "cz-conventional-changelog": "^2.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.5.3",
     "standard": "^10.0.3",
     "strip-indent": "^2.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
