@@ -10,7 +10,6 @@
     "commit": "git-cz",
     "test": "mocha './{,!(node_modules)/**/}*.test.js'",
     "posttest": "standard",
-    "lint": "eslint '**/*.js'",
     "coverage": "istanbul cover -x '*.test.js' _mocha -- './{,!(node_modules)/**/}*.test.js'",
     "precommit": "npm test",
     "postcommit": "npm test",
