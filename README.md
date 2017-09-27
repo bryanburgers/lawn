@@ -179,3 +179,20 @@ environment string.
 Mark the property as optional. If marked as optional and the property does not
 exist, `lawn.validate` will not throw an error, and instead will not include
 the property in its return value.
+
+### .regex(re, [description])
+
+Validate that the string provided matches the given regex. If it does not, the
+optional description will be displayed as the error message.
+
+```js
+const lawnSpec = {
+    REMOTE_API: lawn.string.regex(/^https?:\/\//i, 'must be an http or https address')
+}
+
+lawn.validate(lawnSpec, { REMOTE_API: 'https://example.com' })
+//=> { REMOTE_API: 'https://example.com' }
+
+lawn.validate(lawnSpec, { REMOTE_API: 'example.com' })
+//=> throws "REMOTE_API is invalid: 'example.com' must be an http or https address"
+```

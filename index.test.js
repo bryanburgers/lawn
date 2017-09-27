@@ -111,7 +111,9 @@ describe('lawn', function () {
         PORT: 8000
       })
     })
+  })
 
+  describe('.optional', function () {
     it('allows optional values', function () {
       const spec = {
         OPTIONAL: lawn.string.optional
@@ -119,6 +121,59 @@ describe('lawn', function () {
 
       const result = lawn.validate(spec, {})
       assert.notProperty(result, 'OPTIONAL')
+    })
+  })
+
+  describe('.regex(re, [description])', function () {
+    it('succeeds when the regex matches', function () {
+      const spec = {
+        REMOTE_API: lawn.string.regex(/^https?:\/\//i, 'is not an http or https address')
+      }
+
+      const result = lawn.validate(spec, { REMOTE_API: 'https://example.com' })
+      assert.propertyVal(result, 'REMOTE_API', 'https://example.com')
+    })
+
+    it('fails with the given error message when the regex fails', function () {
+      const spec = {
+        REMOTE_API: lawn.string.regex(/^https?:\/\//i, 'is not an http or https address')
+      }
+
+      assert.throws(() => lawn.validate(spec, {
+        REMOTE_API: 'example.com'
+      }), /REMOTE_API is invalid: 'example.com' is not an http or https address/)
+    })
+
+    it('does not require an error message', function () {
+      const spec = {
+        REMOTE_API: lawn.string.regex(/^https?:\/\//i)
+      }
+
+      assert.throws(() => lawn.validate(spec, {
+        REMOTE_API: 'example.com'
+      }), /REMOTE_API is invalid: 'example.com' must match the regex .*/)
+    })
+
+    it('validates multiple regexes', function () {
+      const spec = {
+        VALUE: lawn.string.regex(/a/, 'must contain an a').regex(/b/, 'must contain a b')
+      }
+
+      assert.throws(() => lawn.validate(spec, {
+        VALUE: 'b'
+      }), /VALUE is invalid: 'b' must contain an a/)
+
+      assert.throws(() => lawn.validate(spec, {
+        VALUE: 'a'
+      }), /VALUE is invalid: 'a' must contain a b/)
+
+      assert.throws(() => lawn.validate(spec, {
+        VALUE: 'c'
+      }), /VALUE is invalid: 'c' must contain an a/)
+
+      assert.doesNotThrow(() => lawn.validate(spec, {
+        VALUE: 'alabama'
+      }))
     })
   })
 

@@ -77,6 +77,13 @@ const Lawn = {
     return this.props({ optional: true })
   },
 
+  regex (re, message) {
+    if (message === undefined) {
+      message = 'must match the regex ' + re.toString()
+    }
+    return this.validation({ message, fn: v => re.test(v) })
+  },
+
   validate (config, properties) {
     if (!properties) {
       properties = process.env
