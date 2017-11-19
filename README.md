@@ -138,49 +138,36 @@ AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
 [dotenv]: https://www.npmjs.com/package/dotenv
 
-### .string
+### Common properties
 
-Declares that this property is a string.
-
-### .number
-
-Declares this this property is an integer.
-
-### .bool
-
-Declare that this property is a boolean.
-
-Values that resolve to `true` are:
-
-- `"true"` (case-insensitive)
-- `"yes"` (case-insensitive)
-- `"t"` (case-insensitive)
-- `"1"`
-
-All other values resolve to `false`.
-
-### .default(v)
+#### .default(v)
 
 The default value of the property. If no environment variable is set for this
 property, then use the default.
 
-### .description(d)
+#### .description(d)
 
 A description of the property. This is used when generating an example
 environment string.
 
-### .example(v)
+#### .example(v)
 
 An example value of the property. This is used when generating an example
 environment string.
 
-### .optional
+#### .optional
 
 Mark the property as optional. If marked as optional and the property does not
 exist, `lawn.validate` will not throw an error, and instead will not include
 the property in its return value.
 
-### .regex(re, [description])
+### String
+
+#### .string
+
+Declares that this property is a string.
+
+#### .regex(re, [description])
 
 Validate that the string provided matches the given regex. If it does not, the
 optional description will be displayed as the error message.
@@ -195,4 +182,80 @@ lawn.validate(lawnSpec, { REMOTE_API: 'https://example.com' })
 
 lawn.validate(lawnSpec, { REMOTE_API: 'example.com' })
 //=> throws "REMOTE_API is invalid: 'example.com' must be an http or https address"
+```
+
+### Number
+
+#### .number
+
+Declares this this property is an integer.
+
+### Boolean
+
+#### .bool
+
+Declare that this property is a boolean.
+
+Values that resolve to `true` are:
+
+- `"true"` (case-insensitive)
+- `"yes"` (case-insensitive)
+- `"t"` (case-insensitive)
+- `"1"`
+
+All other values resolve to `false`.
+
+### URL
+
+#### .url
+
+Declares that this property is a URL.
+
+#### .protocol(str|regex)
+
+Validate that the URL provided matches the required protocol.
+
+```js
+const lawnSepc = {
+    WEB_API: lawn.url.protocol(/http|https/)
+}
+
+lawn.validate(lawnSpec, { WEB_API: 'https://example.com/api' })
+//=> { WEB_API: 'https://example.com/api' }
+
+lawn.validate(lawnSpec, { WEB_API: 'mysql://user:pass@host/database' })
+//=> throws "WEB_API is invalid: 'mysql://user:pass@host/database' must have a protocol that matches /http|https/"
+```
+
+#### .defaultQuery(name, val)
+
+Defaults a query string parameter to the given value.
+
+```js
+const lawnSepc = {
+    MYSQL: lawn.url.defaultQuery('connectionLimit', '8')
+}
+
+lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database' })
+//=> { MYSQL: 'mysql://user:pass@host/database?connectionLimit=8' }
+
+lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database?connectionLimit=2' })
+//=> { MYSQL: 'mysql://user:pass@host/database?connectionLimit=2' }
+```
+
+#### .overrideQuery(name, val)
+
+Forces a query string parameter to the given value. This is useful if a certain
+query string value needs to be set on the URL.
+
+```js
+const lawnSepc = {
+    MYSQL: lawn.url.overrideQuery('multipleStatements', 'true')
+}
+
+lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database' })
+//=> { MYSQL: 'mysql://user:pass@host/database?multipleStatements=true' }
+
+lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database?multipleStatements=false' })
+//=> { MYSQL: 'mysql://user:pass@host/database?multipleStatements=true' }
 ```

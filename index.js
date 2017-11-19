@@ -78,5 +78,6 @@ Lawn.internals = internalsSymbol
 Lawn.use('string', require('./types/string'))
 Lawn.use('number', require('./types/number'))
 Lawn.use('bool', require('./types/boolean'))
+Lawn.use('url', require('./types/url'))
 
 module.exports = Lawn
