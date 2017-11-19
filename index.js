@@ -1,87 +1,16 @@
 'use strict'
 
-const internalsSymbol = Symbol('Lawn config')
-const validatorsSymbol = Symbol('Lawn validators')
-const transformationsSymbol = Symbol('Lawn transformations')
-const cloneSymbol = Symbol('Lawn create')
+const { internalsSymbol } = require('./symbols')
 
 const Lawn = {
-  [internalsSymbol]: {},
-  [validatorsSymbol]: [],
-  [transformationsSymbol]: [],
-
-  [cloneSymbol] (changes, validator, converter) {
-    const obj = Object.create(Lawn)
-    obj[internalsSymbol] = this[internalsSymbol]
-    obj[validatorsSymbol] = this[validatorsSymbol]
-    obj[transformationsSymbol] = this[transformationsSymbol]
-    return obj
-  },
-
-  props (props) {
-    const obj = this[cloneSymbol]()
-    obj[internalsSymbol] = Object.assign({}, this[internalsSymbol], props)
-    return obj
-  },
-
-  validation (validation) {
-    const obj = this[cloneSymbol]()
-    obj[validatorsSymbol] = [...this[validatorsSymbol], validation]
-    return obj
-  },
-
-  transformation (transformation) {
-    const obj = this[cloneSymbol]()
-    obj[transformationsSymbol] = [...this[transformationsSymbol], transformation]
-    return obj
-  },
-
-  get string () {
-    return this.props({ type: 'string' })
-  },
-
-  get number () {
-    return this.props({ type: 'number' })
-      .transformation(v => parseInt(v, 10))
-      .validation({ message: 'is not a number', fn: v => !Number.isNaN(v) })
-  },
-
-  get bool () {
-    return this.props({ type: 'bool' })
-      .transformation(v => {
-        switch (v.toLowerCase()) {
-          case 'true':
-          case 'yes':
-          case 'y':
-          case '1':
-            return true
-          default:
-            return false
-        }
-      })
-  },
-
-  desc (description) {
-    return this.props({ description })
-  },
-
-  example (example) {
-    return this.props({ example })
-  },
-
-  default (def) {
-    return this.props({ default: def })
-  },
-
-  get optional () {
-    return this.props({ optional: true })
-  },
-
-  regex (re, message) {
-    if (message === undefined) {
-      message = 'must match the regex ' + re.toString()
-    }
-    return this.validation({ message, fn: v => re.test(v) })
+  use (name, BaseClass) {
+    Object.defineProperty(this, name, {
+      configurable: true,
+      enumerable: true,
+      get () {
+        return new BaseClass()
+      }
+    })
   },
 
   validate (config, properties) {
@@ -92,9 +21,8 @@ const Lawn = {
     const result = {}
 
     for (const key of Object.keys(config)) {
+      const obj = config[key]
       const cfg = config[key][internalsSymbol]
-      const transformations = config[key][transformationsSymbol]
-      const validators = config[key][validatorsSymbol]
       const originalVal = properties[key]
 
       let val
@@ -107,15 +35,13 @@ const Lawn = {
         }
         val = cfg.default
       } else {
-        val = transformations.reduce((val, transformation) => transformation(val), originalVal)
+        val = obj._transform(originalVal)
       }
 
-      for (const validator of validators) {
-        const message = validator.message
-        const fn = validator.fn
-        if (!fn(val)) {
-          throw new Error(`${key} is invalid: '${originalVal}' ${message}`)
-        }
+      try {
+        obj.validate(val, originalVal)
+      } catch (err) {
+        throw new Error(`${key} is invalid: '${originalVal}' ${err.message}`)
       }
 
       result[key] = val
@@ -148,5 +74,9 @@ const Lawn = {
 }
 
 Lawn.internals = internalsSymbol
+
+Lawn.use('string', require('./types/string'))
+Lawn.use('number', require('./types/number'))
+Lawn.use('bool', require('./types/boolean'))
 
 module.exports = Lawn
