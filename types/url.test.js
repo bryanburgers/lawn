@@ -1,4 +1,4 @@
-/* global describe it before */
+/* global describe it beforeEach */
 
 'use strict'
 
@@ -8,7 +8,7 @@ const lawn = require('..')
 
 describe('lawn', function () {
   describe('url', function () {
-    before(function () {
+    beforeEach(function () {
       // URL-based checking can only happen when the URL constructor exists,
       // which is Node 7.0.0 and above.
       const { URL } = require('url')
