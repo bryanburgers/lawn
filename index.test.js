@@ -224,6 +224,22 @@ describe('lawn', function () {
             `).trim())
     })
 
+    it('includes descriptions, if available (using description)', function () {
+      const spec = {
+        MYSQL_HOST: lawn.string.description('The MySQL host'),
+        MYSQL_PORT: lawn.number.description('The port to run MySQL on')
+      }
+
+      const result = lawn.output(spec)
+
+      assert.equal(result, stripIndent(`
+                # The MySQL host
+                MYSQL_HOST=
+                # The port to run MySQL on
+                MYSQL_PORT=
+            `).trim())
+    })
+
     it('includes examples', function () {
       const spec = {
         MYSQL_HOST: lawn.string.example('127.0.0.1')

@@ -42,6 +42,10 @@ class LawnBase {
     return this.props({ description })
   }
 
+  description (description) {
+    return this.props({ description })
+  }
+
   example (example) {
     return this.props({ example })
   }

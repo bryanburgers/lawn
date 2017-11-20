@@ -145,7 +145,7 @@ AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 The default value of the property. If no environment variable is set for this
 property, then use the default.
 
-#### .description(d)
+#### .desc(d), .description(d)
 
 A description of the property. This is used when generating an example
 environment string.
