@@ -39,6 +39,14 @@ describe('lawn', function () {
       }), /URL is invalid: 'WHAT' is not a valid URL/)
     })
 
+    it('does not throw when common properties are used first', function () {
+      assert.doesNotThrow(() => {
+        lawn.url
+          .desc('Description first')
+          .defaultQuery('one', 'two')
+      })
+    })
+
     describe('.protocol', function () {
       it('succeeds on a text match', function () {
         const spec = {
@@ -111,7 +119,7 @@ describe('lawn', function () {
       })
     })
 
-    describe('overrideQuery', function () {
+    describe('.overrideQuery', function () {
       it('overrides set values when they are missing', function () {
         const spec = {
           URL: lawn.url.overrideQuery('multipleStatements', 'true')

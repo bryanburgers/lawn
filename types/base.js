@@ -1,6 +1,6 @@
 'use strict'
 
-const { internalsSymbol, validatorsSymbol, cloneSymbol } = require('../symbols')
+const { internalsSymbol, validatorsSymbol } = require('../symbols')
 
 class LawnBase {
   constructor (type, validators) {
@@ -8,23 +8,14 @@ class LawnBase {
     this[validatorsSymbol] = validators || []
   }
 
-  [cloneSymbol] (changes, validator, converter) {
-    const obj = Object.create(Object.getPrototypeOf(this))
-    obj[internalsSymbol] = this[internalsSymbol]
-    obj[validatorsSymbol] = this[validatorsSymbol]
-    return obj
-  }
-
   props (props) {
-    const obj = this[cloneSymbol]()
-    obj[internalsSymbol] = Object.assign({}, this[internalsSymbol], props)
-    return obj
+    this[internalsSymbol] = Object.assign({}, this[internalsSymbol], props)
+    return this
   }
 
   validation (validation) {
-    const obj = this[cloneSymbol]()
-    obj[validatorsSymbol] = [...this[validatorsSymbol], validation]
-    return obj
+    this[validatorsSymbol].push(validation)
+    return this
   }
 
   validate (val, originalVal) {
