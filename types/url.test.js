@@ -93,6 +93,52 @@ describe('lawn', function () {
       })
     })
 
+    describe('.requireTrailingSlash', function () {
+      it('allows a URL with a trailing slash', function () {
+        const spec = {
+          URL: lawn.url.requireTrailingSlash
+        }
+
+        const result = lawn.validate(spec, {
+          URL: 's3://bucket/folder/'
+        })
+
+        assert.equal(result.URL.href, 's3://bucket/folder/')
+      })
+
+      it('rejects a URL without a trailing slash', function () {
+        const spec = {
+          URL: lawn.url.requireTrailingSlash
+        }
+
+        assert.throws(() => lawn.validate(spec, {
+          URL: 's3://bucket/folder'
+        }), /URL is invalid: 's3:\/\/bucket\/folder' must have a trailing slash/)
+      })
+
+      it('allows a URL with a trailing slash and a query string', function () {
+        const spec = {
+          URL: lawn.url.requireTrailingSlash
+        }
+
+        const result = lawn.validate(spec, {
+          URL: 's3://bucket/folder/?region=us-east-1'
+        })
+
+        assert.equal(result.URL.href, 's3://bucket/folder/?region=us-east-1')
+      })
+
+      it('rejects a URL without a trailing slash and a query string', function () {
+        const spec = {
+          URL: lawn.url.requireTrailingSlash
+        }
+
+        assert.throws(() => lawn.validate(spec, {
+          URL: 's3://bucket/folder?region=us-east-1'
+        }), /URL is invalid: 's3:\/\/bucket\/folder\?region=us-east-1' must have a trailing slash/)
+      })
+    })
+
     describe('.defaultQuery', function () {
       it('sets default values when they are missing', function () {
         const spec = {

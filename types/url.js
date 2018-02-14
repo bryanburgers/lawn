@@ -32,6 +32,12 @@ class LawnURL extends LawnBase {
       }
     }
 
+    if (this._trailingSlash === 'required') {
+      if (!/\/$/.test(val.pathname)) {
+        throw new Error(`must have a trailing slash`)
+      }
+    }
+
     super.validate(val)
   }
 
@@ -54,6 +60,12 @@ class LawnURL extends LawnBase {
     }
 
     return url
+  }
+
+  get requireTrailingSlash () {
+    this._trailingSlash = 'required'
+
+    return this
   }
 
   protocol (val) {

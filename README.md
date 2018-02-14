@@ -227,6 +227,38 @@ lawn.validate(lawnSpec, { WEB_API: 'mysql://user:pass@host/database' })
 //=> throws "WEB_API is invalid: 'mysql://user:pass@host/database' must have a protocol that matches /http|https/"
 ```
 
+#### .requireTrailingSlash
+
+For situations where it is useful to use [`new URL(someComponent,
+baseUrl)`][mdnurl] to build up a URL, preventing confusion by requiring a
+trailing slash is useful.
+
+For example, this is often unexpected:
+
+```
+const baseUrl = new URL('s3://bucket-name/folder-name`)
+
+const newKey = new URL('file', baseUrl)
+//=> s3://bucket-name/file (not the expected s3://bucket-name/folder-name/file
+```
+
+To reduce issues like this, `.requireTrailingSlash` will validate that the
+config value does have a trailing slash to prevent confusion.
+
+```
+const lawnSpec = {
+    S3_STORE: lawn.url.requireTrailingSlash
+}
+
+lawn.validate(lawnSpec, { S3_STORE: 's3://bucket/folder/' })
+//=> { S3_STORE: URL { 's3://bucket/folder/' } }
+
+lawn.validate(lawnSpec, { S3_STORE: 's3://bucket/folder' })
+//=> throws "S3_STORE is invalid: 's3://bucket/folder' must have a trailing slash"
+```
+
+[mdnurl]: https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
+
 #### .defaultQuery(name, val)
 
 Defaults a query string parameter to the given value.
