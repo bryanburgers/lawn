@@ -221,7 +221,7 @@ const lawnSepc = {
 }
 
 lawn.validate(lawnSpec, { WEB_API: 'https://example.com/api' })
-//=> { WEB_API: 'https://example.com/api' }
+//=> { WEB_API: URL { 'https://example.com/api' } }
 
 lawn.validate(lawnSpec, { WEB_API: 'mysql://user:pass@host/database' })
 //=> throws "WEB_API is invalid: 'mysql://user:pass@host/database' must have a protocol that matches /http|https/"
@@ -269,10 +269,10 @@ const lawnSepc = {
 }
 
 lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database' })
-//=> { MYSQL: 'mysql://user:pass@host/database?connectionLimit=8' }
+//=> { MYSQL: URL { 'mysql://user:pass@host/database?connectionLimit=8' } }
 
 lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database?connectionLimit=2' })
-//=> { MYSQL: 'mysql://user:pass@host/database?connectionLimit=2' }
+//=> { MYSQL: URL { 'mysql://user:pass@host/database?connectionLimit=2' } }
 ```
 
 #### .overrideQuery(name, val)
@@ -286,8 +286,8 @@ const lawnSepc = {
 }
 
 lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database' })
-//=> { MYSQL: 'mysql://user:pass@host/database?multipleStatements=true' }
+//=> { MYSQL: URL { 'mysql://user:pass@host/database?multipleStatements=true' } }
 
 lawn.validate(lawnSpec, { MYSQL: 'mysql://user:pass@host/database?multipleStatements=false' })
-//=> { MYSQL: 'mysql://user:pass@host/database?multipleStatements=true' }
+//=> { MYSQL: URL { 'mysql://user:pass@host/database?multipleStatements=true' } }
 ```
